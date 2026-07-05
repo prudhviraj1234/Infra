@@ -1,0 +1,179 @@
+{
+  "stats": [
+    {
+      "title": "Total Incidents",
+      "value": 1248,
+      "iconColor": "#F97316",
+      "bgColor": "rgba(249,115,22,.15)"
+    },
+    {
+      "title": "Open Incidents",
+      "value": 542,
+      "iconColor": "#EAB308",
+      "bgColor": "rgba(234,179,8,.15)"
+    },
+    {
+      "title": "Resolved",
+      "value": 612,
+      "iconColor": "#EF4444",
+      "bgColor": "rgba(239,68,68,.15)"
+    },
+    {
+      "title": "Transferred",
+      "value": 94,
+      "iconColor": "#8B5CF6",
+      "bgColor": "rgba(139,92,246,.15)"
+    },
+    {
+      "title": "MTTR",
+      "value": "18.6 hrs",
+      "iconColor": "#3B82F6",
+      "bgColor": "rgba(59,130,246,.15)"
+    }
+  ],
+  "trend": [
+    {
+      "day": "May 19",
+      "value": 150
+    },
+    {
+      "day": "May 20",
+      "value": 90
+    },
+    {
+      "day": "May 21",
+      "value": 80
+    },
+    {
+      "day": "May 22",
+      "value": 170
+    },
+    {
+      "day": "May 23",
+      "value": 120
+    },
+    {
+      "day": "May 24",
+      "value": 110
+    },
+    {
+      "day": "May 25",
+      "value": 90
+    },
+    {
+      "day": "May 26",
+      "value": 160
+    },
+    {
+      "day": "May 27",
+      "value": 145
+    },
+    {
+      "day": "May 28",
+      "value": 95
+    },
+    {
+      "day": "May 29",
+      "value": 155
+    },
+    {
+      "day": "May 30",
+      "value": 170
+    },
+    {
+      "day": "May 31",
+      "value": 130
+    },
+    {
+      "day": "Jun 1",
+      "value": 85
+    },
+    {
+      "day": "Jun 2",
+      "value": 100
+    },
+    {
+      "day": "Jun 3",
+      "value": 205
+    }
+  ],
+  "status": [
+    {
+      "name": "Open",
+      "value": 540
+    },
+    {
+      "name": "Resolved",
+      "value": 620
+    },
+    {
+      "name": "Transferred",
+      "value": 88
+    }
+  ],
+  "priority": [
+    {
+      "name": "Critical",
+      "value": 110
+    },
+    {
+      "name": "High",
+      "value": 390
+    },
+    {
+      "name": "Medium",
+      "value": 520
+    },
+    {
+      "name": "Low",
+      "value": 228
+    }
+  ],
+  "incidents": [
+    {
+      "id": 1001,
+      "opened": "2026-06-02",
+      "resolved": "2026-06-03",
+      "location": "New York",
+      "summary": "Network Latency",
+      "ci": "RTR-NY-001",
+      "service": "Network",
+      "priority": "High",
+      "device": "Router",
+      "cause": "Packet Loss",
+      "status": "Open",
+      "transferred": "No",
+      "transferReason": "-"
+    },
+    {
+      "id": 1002,
+      "opened": "2026-06-01",
+      "resolved": "2026-06-02",
+      "location": "London",
+      "summary": "CPU Utilization",
+      "ci": "SRV-LON-101",
+      "service": "Compute",
+      "priority": "Critical",
+      "device": "Server",
+      "cause": "Memory Leak",
+      "status": "Resolved",
+      "transferred": "Yes",
+      "transferReason": "L2 Compute Team"
+    },
+    {
+      "id": 1003,
+      "opened": "2026-06-01",
+      "resolved": "-",
+      "location": "India",
+      "summary": "VPN Down",
+      "ci": "FW-IND-002",
+      "service": "Security",
+      "priority": "Medium",
+      "device": "Firewall",
+      "cause": "Tunnel Failure",
+      "status": "Transferred",
+      "transferred": "Yes",
+      "transferReason": "Security Team"
+    }
+  ]
+}
