@@ -19,9 +19,9 @@ function IncidentTable({ data }) {
 
         return data.filter((item) => {
 
-            const matchSearch =
-                item.summary.toLowerCase().includes(search.toLowerCase()) ||
-                item.location.toLowerCase().includes(search.toLowerCase());
+            const searchTerm = search.toLowerCase();
+            const matchSearch = [item.id, item.summary, item.location, item.service]
+                .some((value) => String(value || "").toLowerCase().includes(searchTerm));
 
             const matchStatus =
                 status === "All" || item.status === status;
@@ -37,10 +37,11 @@ function IncidentTable({ data }) {
 
     const totalPages = Math.ceil(filtered.length / PAGE_SIZE);
 
-    const current = filtered.slice(
-        (page - 1) * PAGE_SIZE,
-        page * PAGE_SIZE
-    );
+    const pageCount = Math.max(totalPages, 1);
+
+    const current = filtered.slice((page - 1) * PAGE_SIZE, page * PAGE_SIZE);
+
+    const resetPage = () => setPage(1);
 
     const exportExcel = () => {
 
@@ -75,61 +76,69 @@ function IncidentTable({ data }) {
 
             <div className="table-toolbar">
 
-                <div className="search-box">
+                <div className="table-tools-left">
+                    <div className="search-box">
 
-                    <FiSearch />
+                        <FiSearch />
 
-                    <input
-                        placeholder="Search Incident..."
-                        value={search}
-                        onChange={(e) =>
-                            setSearch(e.target.value)
-                        }
-                    />
+                        <input
+                            placeholder="Search by ID, summary, or team"
+                            value={search}
+                            onChange={(event) => {
+                                setSearch(event.target.value);
+                                resetPage();
+                            }}
+                        />
 
+                    </div>
+
+                    <select
+                        className="filter-select"
+                        value={status}
+                        onChange={(event) => {
+                            setStatus(event.target.value);
+                            resetPage();
+                        }}
+                    >
+
+                        <option value="All">All statuses</option>
+                        <option>Open</option>
+                        <option>Resolved</option>
+                        <option>Transferred</option>
+
+                    </select>
+
+                    <select
+                        className="filter-select"
+                        value={priority}
+                        onChange={(event) => {
+                            setPriority(event.target.value);
+                            resetPage();
+                        }}
+                    >
+
+                        <option value="All">All priorities</option>
+                        <option>Critical</option>
+                        <option>High</option>
+                        <option>Medium</option>
+                        <option>Low</option>
+
+                    </select>
                 </div>
 
-                <select
-                    value={status}
-                    onChange={(e) =>
-                        setStatus(e.target.value)
-                    }
-                >
-
-                    <option>All</option>
-                    <option>Open</option>
-                    <option>Resolved</option>
-                    <option>Transferred</option>
-
-                </select>
-
-                <select
-                    value={priority}
-                    onChange={(e) =>
-                        setPriority(e.target.value)
-                    }
-                >
-
-                    <option>All</option>
-                    <option>Critical</option>
-                    <option>High</option>
-                    <option>Medium</option>
-                    <option>Low</option>
-
-                </select>
-
-                <button
-                    className="export-btn"
-                    onClick={exportExcel}
-                >
-                    <FiDownload />
-                    Export Excel
-                </button>
+                <div className="table-tools-right">
+                    <span className="table-count">{filtered.length} records</span>
+                    <button className="export-btn" onClick={exportExcel}>
+                        <FiDownload />
+                        Export Excel
+                    </button>
+                </div>
 
             </div>
 
             {/* Table */}
 
+            <div className="table-wrapper">
             <table className="incident-table">
 
                 <thead>
@@ -164,7 +173,13 @@ function IncidentTable({ data }) {
 
                 <tbody>
 
-                    {current.map((item) => (
+                    {current.length === 0 ? (
+                        <tr>
+                            <td className="table-empty" colSpan="11">
+                                No incidents match the current filters.
+                            </td>
+                        </tr>
+                    ) : current.map((item) => (
 
                         <tr key={item.id}>
 
@@ -176,7 +191,7 @@ function IncidentTable({ data }) {
 
                             <td>{item.location}</td>
 
-                            <td>{item.summary}</td>
+                            <td title={item.summary}>{item.summary}</td>
 
                             <td>{item.ci}</td>
 
@@ -213,6 +228,7 @@ function IncidentTable({ data }) {
                 </tbody>
 
             </table>
+            </div>
 
             {/* Pagination */}
 
@@ -229,12 +245,12 @@ function IncidentTable({ data }) {
 
                 <span>
 
-                    Page {page} of {totalPages}
+                    Page {page} of {pageCount}
 
                 </span>
 
                 <button
-                    disabled={page === totalPages}
+                    disabled={page >= pageCount}
                     onClick={() =>
                         setPage(page + 1)
                     }

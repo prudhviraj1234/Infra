@@ -10,16 +10,18 @@ import DeviceInsights from "../components/DeviceInsights";
 import CauseInsights from "../components/CauseInsights";
 import Reports from "../components/Reports";
 
-const API_URL =
+const OD_API_URL =
   "http://pla-w@ligni02:3010/service/handover/incident/?group=MS%20SQL%20Database%20L2";
 
-const EMPTY_DASHBOARD = {
-  stats: [],
-  trend: [],
-  status: [],
-  priority: [],
-  incidents: [],
+const IMS_API_URL =
+  "http://pla-w@ligni02:3010/service/handover/incident/?group=IMS%20L2";
+
+const TEAM_API_URLS = {
+  OD: [OD_API_URL],
+  IMS: [IMS_API_URL],
+  ALL: [OD_API_URL, IMS_API_URL],
 };
+
 
 const normalizePriority = (priority = "") => {
   const value = String(priority).trim();
@@ -178,8 +180,9 @@ const buildTrendChart = (incidents) => {
 };
 
 const buildStats = (incidents) => {
-  const open = incidents.filter((incident) => normalizeStatus(incident.state) !== "Resolved").length;
-  const resolved = incidents.filter((incident) => normalizeStatus(incident.state) === "Resolved").length;
+  const open = incidents.filter((incident) => normalizeStatus(incident.status) !== "Resolved").length;
+  const resolved = incidents.filter((incident) => normalizeStatus(incident.status) === "Resolved").length;
+  const transferred = incidents.filter((incident) => normalizeStatus(incident.status) === "Transferred").length;
 
   return [
     {
@@ -202,7 +205,7 @@ const buildStats = (incidents) => {
     },
     {
       title: "Transferred",
-      value: 0,
+      value: transferred,
       iconColor: "#8B5CF6",
       bgColor: "rgba(139,92,246,.15)",
     },
@@ -228,26 +231,30 @@ function Dashboard() {
   const [allIncidents, setAllIncidents] = useState([]);
   const [fromDate, setFromDate] = useState("");
   const [toDate, setToDate] = useState("");
+  const [team, setTeam] = useState("OD");
 
   useEffect(() => {
     let isMounted = true;
 
     const fetchIncidents = async () => {
       try {
-        const response = await fetch(API_URL, {
-          method: "GET",
-          headers: {
-            Accept: "application/json",
-          },
-          mode: "cors",
-        });
+        const responses = await Promise.all(TEAM_API_URLS[team].map(async (url) => {
+          const response = await fetch(url, {
+            method: "GET",
+            headers: { Accept: "application/json" },
+            mode: "cors",
+          });
 
-        if (!response.ok) {
-          throw new Error(`Request failed with status ${response.status}`);
-        }
+          if (!response.ok) {
+            throw new Error(`Request failed with status ${response.status}`);
+          }
 
-        const data = await response.json();
-        const incidents = Array.isArray(data) ? data.map(normalizeIncident) : [];
+          return response.json();
+        }));
+
+        const incidents = responses
+          .flatMap((data) => (Array.isArray(data) ? data : []))
+          .map(normalizeIncident);
 
         if (isMounted) {
           setAllIncidents(incidents);
@@ -265,7 +272,7 @@ function Dashboard() {
     return () => {
       isMounted = false;
     };
-  }, []);
+  }, [team]);
 
   const filteredIncidents = useMemo(
     () => filterIncidentsByDate(allIncidents, fromDate, toDate),
@@ -304,6 +311,8 @@ function Dashboard() {
         <Header
           fromDate={fromDate}
           toDate={toDate}
+          team={team}
+          onTeamChange={setTeam}
           onFromDateChange={setFromDate}
           onToDateChange={setToDate}
         />

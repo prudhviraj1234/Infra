@@ -4,7 +4,14 @@ import {
     FiCalendar,
 } from "react-icons/fi";
 
-function Header({ fromDate, toDate, onFromDateChange, onToDateChange }) {
+function Header({
+    fromDate,
+    toDate,
+    team,
+    onFromDateChange,
+    onToDateChange,
+    onTeamChange,
+}) {
     return (
         <section className="dashboard-header">
 
@@ -86,14 +93,13 @@ function Header({ fromDate, toDate, onFromDateChange, onToDateChange }) {
 
                 <div className="dropdown-group">
 
-                    <label>Location</label>
+                    <label>Team</label>
 
-                    <select>
+                    <select value={team} onChange={(event) => onTeamChange(event.target.value)}>
 
-                        <option>Global</option>
-                        <option>India</option>
-                        <option>USA</option>
-                        <option>Europe</option>
+                        <option value="OD">OD</option>
+                        <option value="IMS">IMS</option>
+                        <option value="ALL">ALL</option>
 
                     </select>
 
