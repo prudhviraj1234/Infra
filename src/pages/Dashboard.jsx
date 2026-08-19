@@ -150,6 +150,14 @@ const buildStats = (incidents) => {
   ];
 };
 
+const buildDashboardFromIncidents = (incidents) => ({
+  stats: buildStats(incidents),
+  trend: buildTrendChart(incidents),
+  status: buildStatusChart(incidents),
+  priority: buildPriorityChart(incidents),
+  incidents,
+});
+
 function Dashboard() {
   const [activeTab, setActiveTab] = useState("incidents");
   const [dashboard, setDashboard] = useState(EMPTY_DASHBOARD);
@@ -176,13 +184,7 @@ function Dashboard() {
         const incidents = Array.isArray(data) ? data.map(normalizeIncident) : [];
 
         if (isMounted) {
-          setDashboard({
-            stats: buildStats(incidents),
-            trend: buildTrendChart(incidents),
-            status: buildStatusChart(incidents),
-            priority: buildPriorityChart(incidents),
-            incidents,
-          });
+          setDashboard(buildDashboardFromIncidents(incidents));
         }
       } catch (error) {
         console.error("Unable to load incidents from API", error);
