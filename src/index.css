@@ -72,6 +72,7 @@ body {
 }
 
 .dashboard-main {
+  position: relative;
   flex: 1;
   display: grid;
   grid-template-rows: auto auto auto 1fr;
@@ -84,6 +85,38 @@ body {
 
 .dashboard-main > * {
   min-width: 0;
+}
+
+.dashboard-loading {
+  position: absolute;
+  inset: 0;
+  z-index: 20;
+  display: flex;
+  align-items: flex-start;
+  justify-content: center;
+  gap: 10px;
+  padding-top: 28px;
+  color: var(--text);
+  background: rgba(244, 246, 251, .62);
+  backdrop-filter: blur(2px);
+  font-size: 14px;
+  font-weight: 700;
+  pointer-events: all;
+}
+
+.loading-spinner {
+  width: 18px;
+  height: 18px;
+  border: 3px solid var(--primary-light);
+  border-top-color: var(--primary);
+  border-radius: 50%;
+  animation: dashboard-spin .75s linear infinite;
+}
+
+@keyframes dashboard-spin {
+  to {
+    transform: rotate(360deg);
+  }
 }
 
 button,

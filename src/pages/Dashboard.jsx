@@ -229,20 +229,26 @@ const buildDashboardFromIncidents = (incidents) => ({
 function Dashboard() {
   const [activeTab, setActiveTab] = useState("incidents");
   const [allIncidents, setAllIncidents] = useState([]);
+  const [isLoading, setIsLoading] = useState(true);
+  const [isFiltering, setIsFiltering] = useState(false);
   const [fromDate, setFromDate] = useState("");
   const [toDate, setToDate] = useState("");
   const [team, setTeam] = useState("OD");
 
   useEffect(() => {
     let isMounted = true;
+    const controller = new AbortController();
+
+    setIsLoading(true);
 
     const fetchIncidents = async () => {
       try {
-        const responses = await Promise.all(TEAM_API_URLS[team].map(async (url) => {
+        const responses = await Promise.allSettled(TEAM_API_URLS[team].map(async (url) => {
           const response = await fetch(url, {
             method: "GET",
             headers: { Accept: "application/json" },
             mode: "cors",
+            signal: controller.signal,
           });
 
           if (!response.ok) {
@@ -253,16 +259,21 @@ function Dashboard() {
         }));
 
         const incidents = responses
-          .flatMap((data) => (Array.isArray(data) ? data : []))
+          .filter((result) => result.status === "fulfilled")
+          .flatMap((result) => (Array.isArray(result.value) ? result.value : []))
           .map(normalizeIncident);
 
         if (isMounted) {
           setAllIncidents(incidents);
+          setIsLoading(false);
         }
       } catch (error) {
+        if (error.name === "AbortError") return;
+
         console.error("Unable to load incidents from API", error);
         if (isMounted) {
           setAllIncidents([]);
+          setIsLoading(false);
         }
       }
     };
@@ -271,8 +282,18 @@ function Dashboard() {
 
     return () => {
       isMounted = false;
+      controller.abort();
     };
   }, [team]);
+
+  useEffect(() => {
+    if (isLoading) return undefined;
+
+    setIsFiltering(true);
+    const timer = window.setTimeout(() => setIsFiltering(false), 250);
+
+    return () => window.clearTimeout(timer);
+  }, [fromDate, toDate]);
 
   const filteredIncidents = useMemo(
     () => filterIncidentsByDate(allIncidents, fromDate, toDate),
@@ -308,6 +329,13 @@ function Dashboard() {
       <Sidebar activeTab={activeTab} setActiveTab={setActiveTab} />
 
       <main className="dashboard-main">
+        {(isLoading || isFiltering) && (
+          <div className="dashboard-loading" role="status" aria-live="polite">
+            <span className="loading-spinner" />
+            <span>{isLoading ? "Loading incidents..." : "Updating dashboard..."}</span>
+          </div>
+        )}
+
         <Header
           fromDate={fromDate}
           toDate={toDate}
