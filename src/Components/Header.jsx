@@ -2,10 +2,9 @@ import {
     FiBell,
     FiRefreshCw,
     FiCalendar,
-    FiPlus,
 } from "react-icons/fi";
 
-function Header() {
+function Header({ fromDate, toDate, onFromDateChange, onToDateChange }) {
     return (
         <section className="dashboard-header">
 
@@ -57,7 +56,11 @@ function Header() {
 
                         <FiCalendar />
 
-                        <input type="date" />
+                        <input
+                            type="date"
+                            value={fromDate}
+                            onChange={(event) => onFromDateChange(event.target.value)}
+                        />
 
                     </div>
 
@@ -71,7 +74,11 @@ function Header() {
 
                         <FiCalendar />
 
-                        <input type="date" />
+                        <input
+                            type="date"
+                            value={toDate}
+                            onChange={(event) => onToDateChange(event.target.value)}
+                        />
 
                     </div>
 
@@ -91,14 +98,6 @@ function Header() {
                     </select>
 
                 </div>
-
-                <button className="add-filter-btn">
-
-                    <FiPlus />
-
-                    Add Filter
-
-                </button>
 
             </div>
 

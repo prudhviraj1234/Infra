@@ -67,6 +67,7 @@ body {
   display: flex;
   width: 100%;
   min-height: 100vh;
+  overflow: hidden;
 }
 
 .dashboard-main {
@@ -76,6 +77,8 @@ body {
   gap: 16px;
   padding: 18px;
   min-height: 0;
+  max-width: 100%;
+  overflow: hidden;
 }
 
 @media (max-width: 1100px) {
@@ -736,7 +739,7 @@ body {
 
   padding: 20px;
 
-  overflow: auto;
+  overflow: hidden;
 }
 
 /* ==========================================================
@@ -858,7 +861,7 @@ body {
 
   width: 100%;
 
-  overflow: auto;
+  overflow: hidden;
 
   border: 1px solid var(--border);
 
@@ -867,9 +870,9 @@ body {
 
 table {
   width: 100%;
-  min-width: 980px;
   border-collapse: collapse;
   background: #fff;
+  table-layout: fixed;
 }
 
 thead {
@@ -895,7 +898,9 @@ th {
 
   font-weight: 700;
 
-  white-space: nowrap;
+  white-space: normal;
+
+  overflow-wrap: anywhere;
 
   border-bottom: 1px solid var(--border);
 }
@@ -908,7 +913,11 @@ td {
 
   font-size: 14px;
 
-  white-space: nowrap;
+  white-space: normal;
+
+  overflow-wrap: anywhere;
+
+  word-break: break-word;
 }
 
 tbody tr {

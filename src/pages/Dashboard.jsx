@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import Sidebar from "../components/Sidebar";
 import Header from "../components/Header";
 import StatCard from "../components/StatCard";
@@ -39,10 +39,75 @@ const normalizeStatus = (status = "") => {
   const lower = value.toLowerCase();
 
   if (lower.includes("hold")) return "Open";
-  if (lower.includes("close") || lower.includes("resolve")) return "Resolved";
+  if (lower.includes("close") || lower.includes("resolve") || lower.includes("resolved")) return "Resolved";
   if (lower.includes("transfer")) return "Transferred";
 
   return value;
+};
+
+const formatDateKey = (date) => {
+  const year = date.getFullYear();
+  const month = String(date.getMonth() + 1).padStart(2, "0");
+  const day = String(date.getDate()).padStart(2, "0");
+  return `${year}-${month}-${day}`;
+};
+
+const parseDateValue = (value) => {
+  if (!value) return null;
+  const text = String(value).trim();
+
+  if (!text) return null;
+
+  if (/^\d{4}-\d{2}-\d{2}$/.test(text)) {
+    const parsed = new Date(`${text}T00:00:00`);
+    return Number.isNaN(parsed.getTime()) ? null : parsed;
+  }
+
+  const parsed = new Date(text);
+  if (!Number.isNaN(parsed.getTime())) return parsed;
+
+  const match = text.match(/^(\d{1,2})\s+[A-Za-z]{3}\s+(\d{4})/);
+  if (!match) return null;
+
+  const day = Number(match[1]);
+  const year = Number(match[2]);
+  const monthMap = {
+    Jan: 0,
+    Feb: 1,
+    Mar: 2,
+    Apr: 3,
+    May: 4,
+    Jun: 5,
+    Jul: 6,
+    Aug: 7,
+    Sep: 8,
+    Oct: 9,
+    Nov: 10,
+    Dec: 11,
+  };
+
+  const monthText = text.match(/[A-Za-z]{3}/)?.[0];
+  const month = monthText ? monthMap[monthText] : 0;
+
+  const fallback = new Date(year, month, day, 0, 0, 0, 0);
+  return Number.isNaN(fallback.getTime()) ? null : fallback;
+};
+
+const filterIncidentsByDate = (incidents, fromDate, toDate) => {
+  if (!fromDate && !toDate) return incidents;
+
+  return incidents.filter((incident) => {
+    const openedDate = parseDateValue(incident.opened);
+    if (!openedDate) return true;
+
+    const from = fromDate ? new Date(`${fromDate}T00:00:00`) : null;
+    const to = toDate ? new Date(`${toDate}T23:59:59`) : null;
+
+    if (from && openedDate < from) return false;
+    if (to && openedDate > to) return false;
+
+    return true;
+  });
 };
 
 const normalizeIncident = (incident) => ({
@@ -102,11 +167,11 @@ const buildTrendChart = (incidents) => {
   const dateMap = new Map();
 
   incidents.forEach((incident) => {
-    const opened = incident.created_at || "";
+    const opened = parseDateValue(incident.opened || incident.created_at);
     if (!opened) return;
 
-    const date = opened.split(" ")[0];
-    dateMap.set(date, (dateMap.get(date) || 0) + 1);
+    const dateKey = formatDateKey(opened);
+    dateMap.set(dateKey, (dateMap.get(dateKey) || 0) + 1);
   });
 
   return [...dateMap.entries()].slice(-10).map(([day, value]) => ({ day, value }));
@@ -160,7 +225,9 @@ const buildDashboardFromIncidents = (incidents) => ({
 
 function Dashboard() {
   const [activeTab, setActiveTab] = useState("incidents");
-  const [dashboard, setDashboard] = useState(EMPTY_DASHBOARD);
+  const [allIncidents, setAllIncidents] = useState([]);
+  const [fromDate, setFromDate] = useState("");
+  const [toDate, setToDate] = useState("");
 
   useEffect(() => {
     let isMounted = true;
@@ -173,7 +240,6 @@ function Dashboard() {
             Accept: "application/json",
           },
           mode: "cors",
-          credentials: "include",
         });
 
         if (!response.ok) {
@@ -184,12 +250,12 @@ function Dashboard() {
         const incidents = Array.isArray(data) ? data.map(normalizeIncident) : [];
 
         if (isMounted) {
-          setDashboard(buildDashboardFromIncidents(incidents));
+          setAllIncidents(incidents);
         }
       } catch (error) {
         console.error("Unable to load incidents from API", error);
         if (isMounted) {
-          setDashboard(EMPTY_DASHBOARD);
+          setAllIncidents([]);
         }
       }
     };
@@ -200,6 +266,16 @@ function Dashboard() {
       isMounted = false;
     };
   }, []);
+
+  const filteredIncidents = useMemo(
+    () => filterIncidentsByDate(allIncidents, fromDate, toDate),
+    [allIncidents, fromDate, toDate]
+  );
+
+  const dashboard = useMemo(
+    () => buildDashboardFromIncidents(filteredIncidents),
+    [filteredIncidents]
+  );
 
   const renderContent = () => {
     switch (activeTab) {
@@ -225,7 +301,12 @@ function Dashboard() {
       <Sidebar activeTab={activeTab} setActiveTab={setActiveTab} />
 
       <main className="dashboard-main">
-        <Header />
+        <Header
+          fromDate={fromDate}
+          toDate={toDate}
+          onFromDateChange={setFromDate}
+          onToDateChange={setToDate}
+        />
 
         <section className="stats-grid">
           {dashboard.stats.map((item, index) => (
