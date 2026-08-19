@@ -11,6 +11,7 @@ function Header({
     onFromDateChange,
     onToDateChange,
     onTeamChange,
+    onRefresh,
 }) {
     return (
         <section className="dashboard-header">
@@ -35,7 +36,7 @@ function Header({
                         <FiBell />
                     </button>
 
-                    <button className="icon-button">
+                    <button className="icon-button" onClick={onRefresh} aria-label="Refresh incidents">
                         <FiRefreshCw />
                     </button>
 

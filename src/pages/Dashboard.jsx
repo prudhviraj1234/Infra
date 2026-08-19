@@ -234,6 +234,7 @@ function Dashboard() {
   const [fromDate, setFromDate] = useState("");
   const [toDate, setToDate] = useState("");
   const [team, setTeam] = useState("OD");
+  const [reloadKey, setReloadKey] = useState(0);
 
   useEffect(() => {
     let isMounted = true;
@@ -243,32 +244,33 @@ function Dashboard() {
 
     const fetchIncidents = async () => {
       try {
-        const responses = [];
+        const responses = await Promise.allSettled(
+          TEAM_API_URLS[team].map(async (url) => {
+            const separator = url.includes("?") ? "&" : "?";
+            const response = await fetch(`${url}${separator}_refresh=${Date.now()}`, {
+              method: "GET",
+              headers: { Accept: "application/json" },
+              mode: "cors",
+              cache: "no-store",
+              signal: controller.signal,
+            });
 
-        for (const url of TEAM_API_URLS[team]) {
-          try {
-          const response = await fetch(url, {
-            method: "GET",
-            headers: { Accept: "application/json" },
-            mode: "cors",
-            signal: controller.signal,
-          });
+            if (!response.ok) {
+              throw new Error(`Request failed with status ${response.status}`);
+            }
 
-          if (!response.ok) {
-            throw new Error(`Request failed with status ${response.status}`);
-          }
-
-            const data = await response.json();
-            responses.push(Array.isArray(data) ? data : []);
-          } catch (error) {
-            if (error.name === "AbortError") throw error;
-            console.error(`Unable to load incidents from ${url}`, error);
-          }
-        }
+            return response.json();
+          })
+        );
 
         const incidents = responses
-          .flatMap((data) => data)
+          .filter((result) => result.status === "fulfilled")
+          .flatMap((result) => (Array.isArray(result.value) ? result.value : []))
           .map(normalizeIncident);
+
+        responses
+          .filter((result) => result.status === "rejected" && result.reason?.name !== "AbortError")
+          .forEach((result) => console.error("Unable to load team incidents", result.reason));
 
         if (isMounted) {
           setAllIncidents(incidents);
@@ -291,7 +293,7 @@ function Dashboard() {
       isMounted = false;
       controller.abort();
     };
-  }, [team]);
+  }, [team, reloadKey]);
 
   useEffect(() => {
     if (isLoading) return undefined;
@@ -311,6 +313,11 @@ function Dashboard() {
     () => buildDashboardFromIncidents(filteredIncidents),
     [filteredIncidents]
   );
+
+  const handleTeamChange = (nextTeam) => {
+    setTeam(nextTeam);
+    setReloadKey((currentKey) => currentKey + 1);
+  };
 
   const renderContent = () => {
     switch (activeTab) {
@@ -347,7 +354,8 @@ function Dashboard() {
           fromDate={fromDate}
           toDate={toDate}
           team={team}
-          onTeamChange={setTeam}
+          onTeamChange={handleTeamChange}
+          onRefresh={() => setReloadKey((currentKey) => currentKey + 1)}
           onFromDateChange={setFromDate}
           onToDateChange={setToDate}
         />
