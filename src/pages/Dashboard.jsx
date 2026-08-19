@@ -243,7 +243,10 @@ function Dashboard() {
 
     const fetchIncidents = async () => {
       try {
-        const responses = await Promise.allSettled(TEAM_API_URLS[team].map(async (url) => {
+        const responses = [];
+
+        for (const url of TEAM_API_URLS[team]) {
+          try {
           const response = await fetch(url, {
             method: "GET",
             headers: { Accept: "application/json" },
@@ -255,12 +258,16 @@ function Dashboard() {
             throw new Error(`Request failed with status ${response.status}`);
           }
 
-          return response.json();
-        }));
+            const data = await response.json();
+            responses.push(Array.isArray(data) ? data : []);
+          } catch (error) {
+            if (error.name === "AbortError") throw error;
+            console.error(`Unable to load incidents from ${url}`, error);
+          }
+        }
 
         const incidents = responses
-          .filter((result) => result.status === "fulfilled")
-          .flatMap((result) => (Array.isArray(result.value) ? result.value : []))
+          .flatMap((data) => data)
           .map(normalizeIncident);
 
         if (isMounted) {
