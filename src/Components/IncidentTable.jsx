@@ -1,3 +1,5 @@
+
+
 import { useMemo, useState } from "react";
 import * as XLSX from "xlsx";
 import { saveAs } from "file-saver";
@@ -15,6 +17,16 @@ function IncidentTable({ data }) {
 
     const [page, setPage] = useState(1);
 
+    const statusOptions = useMemo(
+        () => [...new Set(data.map((item) => item.status).filter(Boolean))].sort(),
+        [data]
+    );
+
+    const priorityOptions = useMemo(
+        () => [...new Set(data.map((item) => item.priority).filter(Boolean))].sort(),
+        [data]
+    );
+
     const filtered = useMemo(() => {
 
         return data.filter((item) => {
@@ -24,11 +36,11 @@ function IncidentTable({ data }) {
                 .some((value) => String(value || "").toLowerCase().includes(searchTerm));
 
             const matchStatus =
-                status === "All" || item.status === status;
+                status === "All" || item.status.toLowerCase() === status.toLowerCase();
 
             const matchPriority =
                 priority === "All" ||
-                item.priority === priority;
+                item.priority.toLowerCase() === priority.toLowerCase();
 
             return matchSearch && matchStatus && matchPriority;
         });
@@ -121,10 +133,9 @@ function IncidentTable({ data }) {
                     >
 
                         <option value="All">All priorities</option>
-                        <option>Critical</option>
-                        <option>High</option>
-                        <option>Medium</option>
-                        <option>Low</option>
+                        {priorityOptions.map((option) => (
+                            <option key={option} value={option}>{option}</option>
+                        ))}
 
                     </select>
                 </div>
