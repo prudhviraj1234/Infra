@@ -20,7 +20,7 @@ function IncidentTable({ data }) {
         return data.filter((item) => {
 
             const searchTerm = search.toLowerCase();
-            const matchSearch = [item.id, item.summary, item.location, item.service]
+            const matchSearch = [item.id, item.summary, item.location, item.service, item.assignee]
                 .some((value) => String(value || "").toLowerCase().includes(searchTerm));
 
             const matchStatus =
@@ -159,6 +159,8 @@ function IncidentTable({ data }) {
 
                         <th>Service</th>
 
+                        <th>Assignee</th>
+
                         <th>Priority</th>
 
                         <th>Status</th>
@@ -175,7 +177,7 @@ function IncidentTable({ data }) {
 
                     {current.length === 0 ? (
                         <tr>
-                            <td className="table-empty" colSpan="11">
+                            <td className="table-empty" colSpan="12">
                                 No incidents match the current filters.
                             </td>
                         </tr>
@@ -196,6 +198,8 @@ function IncidentTable({ data }) {
                             <td>{item.ci}</td>
 
                             <td>{item.service}</td>
+
+                            <td>{item.assignee}</td>
 
                             <td>
 

@@ -120,6 +120,7 @@ const normalizeIncident = (incident) => ({
   summary: incident.title || incident.description || "No title",
   ci: incident.parent || incident.group || "-",
   service: incident.group || "N/A",
+  assignee: incident.assignee || "N/A",
   priority: normalizePriority(incident.priority),
   device: incident.assignee || "N/A",
   cause: incident.problem || "-",
