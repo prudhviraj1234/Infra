@@ -40,7 +40,7 @@ const normalizeStatus = (status = "") => {
   if (!value) return "Open";
   const lower = value.toLowerCase();
 
-  if (lower.includes("hold")) return "Open";
+  if (lower.includes("hold")) return "On Hold";
   if (lower.includes("close") || lower.includes("resolve") || lower.includes("resolved")) return "Resolved";
   if (lower.includes("transfer")) return "Transferred";
 
