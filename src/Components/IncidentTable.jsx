@@ -101,8 +101,11 @@ function IncidentTable({ data }) {
                         }}
                     >
 
-                        <option value="All">All statuses</option>
+                        <option value="All">All Status</option>
                         <option>Open</option>
+                        <option>On-hold</option>
+                        <option>Completed</option>
+                        <option>Closed</option>
                         <option>Resolved</option>
                         <option>Transferred</option>
 
@@ -151,11 +154,11 @@ function IncidentTable({ data }) {
 
                         <th>Resolved</th>
 
-                        <th>Location</th>
+                        
 
                         <th>Summary</th>
 
-                        <th>CI</th>
+                        
 
                         <th>Service</th>
 
@@ -167,7 +170,7 @@ function IncidentTable({ data }) {
 
                         <th>Transferred</th>
 
-                        <th>Transfer Reason</th>
+                        
 
                     </tr>
 
@@ -191,11 +194,11 @@ function IncidentTable({ data }) {
 
                             <td>{item.resolved}</td>
 
-                            <td>{item.location}</td>
+                            
 
                             <td title={item.summary}>{item.summary}</td>
 
-                            <td>{item.ci}</td>
+                            
 
                             <td>{item.service}</td>
 
@@ -222,8 +225,6 @@ function IncidentTable({ data }) {
                             </td>
 
                             <td>{item.transferred}</td>
-
-                            <td>{item.transferReason}</td>
 
                         </tr>
 

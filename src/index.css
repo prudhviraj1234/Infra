@@ -1106,6 +1106,25 @@ tbody tr:hover {
 
   color: var(--warning);
 }
+.badge.closed {
+
+  background: rgba(234, 179, 8, .12);
+
+  color: var(--warning);
+}
+.badge.completed {
+
+  background: rgba(234, 179, 8, .12);
+
+  color: var(--warning);
+}
+.badge.On-hold {
+
+  background: rgba(242, 97, 14, 0.12);
+
+  color: var(--warning);
+}
+
 
 .badge.resolved {
 

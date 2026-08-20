@@ -4,17 +4,17 @@ import Header from "../components/Header";
 import StatCard from "../components/StatCard";
 import TrendChart from "../components/TrendChart";
 import DonutChart from "../components/DonutChart";
-import IncidentTable from "../components/IncidentTable";
+import IncidentTable from "../Components/IncidentTable";
 import TrendInsights from "../components/TrendInsights";
 import DeviceInsights from "../components/DeviceInsights";
 import CauseInsights from "../components/CauseInsights";
 import Reports from "../components/Reports";
 
 const OD_API_URL =
-  "http://pla-w@ligni02:3010/service/handover/incident/?group=MS%20SQL%20Database%20L2";
+  "http://pla-w01igni02:3010/service/handover/incident/?group=Object%20Distribution%20L2";
 
 const IMS_API_URL =
-  "http://pla-w@ligni02:3010/service/handover/incident/?group=IMS%20L2";
+  "http://pla-w01igni02:3010/service/handover/incident/?group=Site%20wintel%20L2";
 
 const TEAM_API_URLS = {
   OD: [OD_API_URL],
@@ -40,9 +40,10 @@ const normalizeStatus = (status = "") => {
   if (!value) return "Open";
   const lower = value.toLowerCase();
 
-  if (lower.includes("hold")) return "Open";
-  if (lower.includes("close") || lower.includes("resolve") || lower.includes("resolved")) return "Resolved";
-  if (lower.includes("transfer")) return "Transferred";
+  if (lower.includes("On Hold")) return "On-Hold";
+  if (lower.includes("close")) return "Closed" ;
+  if( lower.includes("resolve") || lower.includes("resolved")) return "Resolved";
+  if (lower.includes("transfer")||lower.includes("transferred")) return "Transferred";
 
   return value;
 };
